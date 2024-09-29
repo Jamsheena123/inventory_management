@@ -114,50 +114,6 @@ class ItemDetailView(generics.RetrieveAPIView):
     serializer_class = ItemSerializer
     permission_classes = [AllowAny]
 
-    # def get(self, request, *args, **kwargs):
-    #     item_id = self.kwargs.get('pk')
-    #     token = None
-    #     auth_header = request.META.get('HTTP_AUTHORIZATION')
-    #     if auth_header is None:
-    #         raise AuthenticationFailed("Authorization header not found")
-        
-    #     if auth_header:
-    #         try:
-    #             token_type, token = auth_header.split()  
-    #             if token_type.lower() != 'bearer':
-    #                 token = None  
-    #         except ValueError:
-    #             token = None  
-
-    #     user = verify_access_token(token)
-    #     if user is None:
-    #         raise AuthenticationFailed("Invalid token")
-        
-    #     valid = User.objects.filter(id=user["id"]).first()
-    #     if valid is None:
-    #         raise AuthenticationFailed("Invalid token")
-
-
-        # cache_key = f'item_detail_{item_id}'
-        # item_data = cache.get(cache_key)
-
-        # if item_data is None:
-        #     try:
-        #         item = self.get_object()
-        #         item_data = ItemSerializer(item).data
-        #         cache.set(cache_key, item_data, timeout=60*15)  
-        #     except Item.DoesNotExist:
-        #         return Response({
-        #             "message": "Item not found"
-        #         }, status=status.HTTP_404_NOT_FOUND)
-        # else:
-        #     print("Cache hit for item:", item_id)
-
-        # return Response({
-        #     "item": item_data,  
-        #     "message": "Item retrieved successfully"
-        # }, status=status.HTTP_200_OK)
-
 
 
     def get(self, request, *args, **kwargs):
@@ -185,24 +141,24 @@ class ItemDetailView(generics.RetrieveAPIView):
         if valid is None:
             raise AuthenticationFailed("Invalid token")
 
-        # Retrieve the item from the database
+       
         try:
-            item = self.get_object()  # This will use the queryset defined in the class
-            item_data = ItemSerializer(item).data  # Serialize the item data
+            item = self.get_object()  
+            item_data = ItemSerializer(item).data  
         except Item.DoesNotExist:
             return Response({
                 "message": "Item not found"
             }, status=status.HTTP_404_NOT_FOUND)
 
-        # Optionally use caching
-        # cache_key = f'item_detail_{item_id}'
-        # item_data = cache.get(cache_key)
+        Optionally use caching
+        cache_key = f'item_detail_{item_id}'
+        item_data = cache.get(cache_key)
 
-        # if item_data is None:
-        #     # Set item data in cache
-        #     cache.set(cache_key, item_data, timeout=60*15)
-        # else:
-        #     print("Cache hit for item:", item_id)
+        if item_data is None:
+            # Set item data in cache
+            cache.set(cache_key, item_data, timeout=60*15)
+        else:
+            print("Cache hit for item:", item_id)
 
         return Response({
             "item": item_data,  
@@ -253,44 +209,7 @@ class ItemUpdateView(generics.UpdateAPIView):
             "message": "Item updated successfully"
         }, status=status.HTTP_200_OK)
         
-        
-# class ItemDeleteView(generics.DestroyAPIView):
-#     queryset = Item.objects.all()
-#     permission_classes = [AllowAny]  
-
-#     def delete(self, request, *args, **kwargs):
-#         item = self.get_object()  
-        
-#         token = None
-#         auth_header = request.META.get('HTTP_AUTHORIZATION')
-#         if auth_header is None:
-#             raise AuthenticationFailed("Authorization header not found")
-
-#         if auth_header:
-#             try:
-#                 token_type, token = auth_header.split()  
-#                 if token_type.lower() != 'bearer':
-#                     token = None  
-#             except ValueError:
-#                 token = None  
-
-#         user = verify_access_token(token)
-#         if user is None:
-#             raise AuthenticationFailed("Invalid token")
-#         valid=User.objects.filter(id=user["id"]).first()
-#         if valid is None:
-#             raise AuthenticationFailed("Invalid token")
-
-#         self.perform_destroy(item)
-
-#         return Response({
-#             "message": "Item deleted successfully"
-#         }, status=status.HTTP_204_NO_CONTENT)
-#             return Response({
-#                 "message": "Item not found"
-#             }, status=status.HTTP_404_NOT_FOUND)
-
-
+  
 
 
 class ItemDeleteView(generics.DestroyAPIView):
